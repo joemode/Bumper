@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single" >
+        <item
+            android:id="@+id/all_music"
+            android:checked="true"
+            android:title="@string/all_music" />
+        <item
+            android:id="@+id/my_library"
+            android:checked="false"
+            android:title="@string/my_library" />
+        <item
+            android:id="@+id/spotify_library"
+            android:checked="false"
+            android:title="@string/spotify_library" />
+
+        <item
+            android:id="@+id/soundcloud_library"
+            android:checked="false"
+            android:title="@string/soundcloud_library" />
+
+        <item
+            android:id="@+id/google_music_library"
+            android:checked="false"
+            android:title="@string/google_music_library" />
+
+        <item
+            android:id="@+id/settings"
+            android:checked="false"
+            android:title="@string/settings" />
+
+    </group>
+
+</menu>

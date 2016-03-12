@@ -1,0 +1,16 @@
+<resources>
+
+    <!--SYSTEM-->
+    <string name="app_name">Bumper</string>
+    <string name="drawer_open">Drawer Open</string>
+    <string name="drawer_close">Drawer Close</string>
+    <string name="dummy">Dummy</string>
+
+    <!--MENU-->
+    <string name="all_music">All Music</string>
+    <string name="my_library">My Library</string>
+    <string name="spotify_library">Spotify</string>
+    <string name="soundcloud_library">Soundcloud</string>
+    <string name="google_music_library">Google Music</string>
+    <string name="settings">Settings</string>
+</resources>
