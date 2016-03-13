@@ -71,4 +71,8 @@ public class Song {
     public String getmAlbumID() {
         return mAlbumID;
     }
+
+    public void setmArtPath(String mArtPath) {
+        this.mArtPath = mArtPath;
+    }
 }

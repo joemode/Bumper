@@ -6,6 +6,9 @@ import android.database.Cursor;
 import android.provider.MediaStore;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -28,6 +31,7 @@ public class MusicIO {
      */
     public List<Song> buildSongs(String albumID) {
         List<Song> ret = new ArrayList<>();
+        HashMap<String, String> dictionary = buildArtworkDictionary();
 
         String[] projection = new String[] {MediaStore.Audio.Media._ID,
                 MediaStore.Audio.Media.TITLE,
@@ -42,6 +46,8 @@ public class MusicIO {
 
             do {
                 Song song = new Song(c);
+                //TODO: Add album artwork path to the song object from dictionary
+                song.setmArtPath(dictionary.get(c.getString(c.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID))));
 
                 if(albumID != null) {
                     //Filter songs to get if we are on a specific albums page
@@ -94,6 +100,26 @@ public class MusicIO {
         }
 
         return ret;
+    }
+
+    private HashMap<String, String> buildArtworkDictionary() {
+        HashMap<String, String> hashMap = new HashMap<>();
+
+        //TODO: Build an artwork dictionary so that artwork is retrievable by songs
+        String[] projection = new String [] {MediaStore.Audio.Albums._ID,
+                MediaStore.Audio.Albums.ALBUM_ART};
+
+        Cursor c = mContentResolver.query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, projection, null, null, MediaStore.Audio.Media.ALBUM + " ASC");
+
+        if(c != null && c.moveToFirst()) {
+
+            do {
+                hashMap.put(c.getString(c.getColumnIndex(MediaStore.Audio.Albums._ID)), c.getString(c.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART)));
+            } while (c.moveToNext());
+            c.close();
+        }
+        
+        return hashMap;
     }
 
 }
