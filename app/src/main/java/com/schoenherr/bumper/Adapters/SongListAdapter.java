@@ -19,9 +19,11 @@ import android.widget.Toast;
 import com.schoenherr.bumper.MusicIO;
 import com.schoenherr.bumper.R;
 import com.schoenherr.bumper.Song;
+import com.squareup.picasso.Picasso;
 
 import org.w3c.dom.Text;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +48,7 @@ public class SongListAdapter extends BaseAdapter {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                songs = new MusicIO(view.getContext()).buildSongs();
+                songs = new MusicIO(view.getContext()).buildSongs(null);
                 view.post(new Runnable() {
                     @Override
                     public void run() {
@@ -82,10 +84,18 @@ public class SongListAdapter extends BaseAdapter {
 
         TextView primary = (TextView) convertView.findViewById(R.id.primary_text);
         TextView sub = (TextView) convertView.findViewById(R.id.sub_text);
+        ImageView artwork = (ImageView) convertView.findViewById(R.id.artwork);
         ImageButton plus = (ImageButton) convertView.findViewById(R.id.plus_image);
 
         primary.setText(songs.get(position).getmName());
         sub.setText(songs.get(position).getmArtist());
+
+        if(songs.get(position).getmArtPath() != null) {
+            Picasso.with(parent.getContext()).load(new File(songs.get(position).getmArtPath())).resize(200, 200).into(artwork);
+        } else {
+            Picasso.with(parent.getContext()).load(R.drawable.ic_music).resize(200, 200).into(artwork);
+        }
+
         plus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

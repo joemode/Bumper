@@ -13,8 +13,9 @@ public class Song {
     private String mName;
     private String mArtist;
     private String mAlbumName;
+    private String mAlbumID;
     private String mDuration;
-    private String mArtPath;
+    private String mArtPath = null;
     private String mData;
 
 
@@ -30,6 +31,7 @@ public class Song {
         mName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
         mArtist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
         mAlbumName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
+        mAlbumID = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
         mDuration = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
         mData = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
 
@@ -37,60 +39,36 @@ public class Song {
 
     }
 
-    /** Getters & Setters **/
+    /** Getters**/
     public String getmAlbumName() {
         return mAlbumName;
-    }
-
-    public void setmAlbumName(String mAlbumName) {
-        this.mAlbumName = mAlbumName;
     }
 
     public String getmArtist() {
         return mArtist;
     }
 
-    public void setmArtist(String mArtist) {
-        this.mArtist = mArtist;
-    }
-
     public String getmDuration() {
         return mDuration;
-    }
-
-    public void setmDuration(String mDuration) {
-        this.mDuration = mDuration;
     }
 
     public String getmID() {
         return mID;
     }
 
-    public void setmID(String mID) {
-        this.mID = mID;
-    }
-
     public String getmName() {
         return mName;
-    }
-
-    public void setmName(String mName) {
-        this.mName = mName;
     }
 
     public String getmArtPath() {
         return  mArtPath;
     }
 
-    public void setmArtPath(String mArtPath) {
-        this.mArtPath = mArtPath;
-    }
-
     public String getmData() {
         return mData;
     }
 
-    public void setmData(String mData) {
-        this.mData = mData;
+    public String getmAlbumID() {
+        return mAlbumID;
     }
 }
