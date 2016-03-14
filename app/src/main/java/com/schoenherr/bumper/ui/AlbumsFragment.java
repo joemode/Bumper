@@ -2,6 +2,8 @@ package com.schoenherr.bumper.ui;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +11,9 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import com.schoenherr.bumper.Adapters.AlbumListAdapter;
+import com.schoenherr.bumper.Adapters.AlbumRecyclerAdapter;
 import com.schoenherr.bumper.Adapters.SongListAdapter;
+import com.schoenherr.bumper.Adapters.SongRecyclerAdapter;
 import com.schoenherr.bumper.R;
 
 /**
@@ -27,13 +31,25 @@ public class AlbumsFragment  extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_songs, container, false);
+        ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_music_list, container, false);
 
-        ListView lv = (ListView) root.findViewById(R.id.song_list);
+        //ListView lv = (ListView) root.findViewById(R.id.song_list);
+        //ProgressBar spinner = (ProgressBar) root.findViewById(R.id.progress_song);
+
+        //AlbumListAdapter adapter = new AlbumListAdapter(lv, spinner);
+        //lv.setAdapter(adapter);
+
+
         ProgressBar spinner = (ProgressBar) root.findViewById(R.id.progress_song);
+        RecyclerView rv = (RecyclerView) root.findViewById(R.id.song_list);
 
-        AlbumListAdapter adapter = new AlbumListAdapter(lv, spinner);
-        lv.setAdapter(adapter);
+        rv.setHasFixedSize(true);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this.getContext());
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        rv.setLayoutManager(linearLayoutManager);
+
+        AlbumRecyclerAdapter rAdapter = new AlbumRecyclerAdapter(rv, spinner);
+        rv.setAdapter(rAdapter);
 
         return root;
     }

@@ -41,7 +41,7 @@ public class MusicIO {
                 MediaStore.Audio.Media.DURATION,
                 MediaStore.Audio.Media.DATA};
 
-        Cursor c = mContentResolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, null, null, MediaStore.Audio.Media.TITLE + " ASC");
+        Cursor c = mContentResolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, null, null, "upper(" + MediaStore.Audio.Media.TITLE + ") ASC");
         if(c != null && c.moveToFirst()) {
 
             do {
@@ -79,7 +79,7 @@ public class MusicIO {
                 MediaStore.Audio.Albums.ALBUM,
                 MediaStore.Audio.Albums.ARTIST};
 
-        Cursor c = mContentResolver.query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, projection, null, null, MediaStore.Audio.Media.ALBUM + " ASC");
+        Cursor c = mContentResolver.query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, projection, null, null, "upper(" + MediaStore.Audio.Media.ALBUM + ") ASC");
         if(c != null && c.moveToFirst()) {
 
             do {

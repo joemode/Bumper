@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground">
+    android:background="?android:attr/selectableItemBackground"
+    android:minHeight="?attr/actionBarSize">
 
     <ImageView
         android:layout_width="wrap_content"
@@ -37,8 +38,8 @@
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/artwork"
         android:layout_toEndOf="@+id/artwork"
-        android:layout_toStartOf="@+id/plus_image"
-        android:layout_toLeftOf="@+id/plus_image" />
+        android:layout_toStartOf="@+id/divider"
+        android:layout_toLeftOf="@+id/divider" />
 
     <ImageButton
         android:id="@+id/plus_image"
@@ -60,6 +61,8 @@
         android:layout_alignBottom="@+id/buffer"
         android:layout_marginTop="16dip"
         android:layout_marginBottom="16dip"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:background="?android:attr/dividerVertical"
         android:layout_toStartOf="@+id/plus_image"
         android:layout_toLeftOf="@+id/plus_image" />
