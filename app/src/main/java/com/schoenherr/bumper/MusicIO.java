@@ -6,8 +6,6 @@ import android.database.Cursor;
 import android.provider.MediaStore;
 
 import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,8 +14,11 @@ import java.util.List;
  */
 public class MusicIO {
 
-    Context mContext;
-    ContentResolver mContentResolver;
+    private Context mContext;
+    private ContentResolver mContentResolver;
+
+    private static final int ARTISTS_ID = 0;
+    private static final int SONGS_ID = 1;
 
     public MusicIO(Context context) {
         this.mContext = context;
@@ -31,7 +32,7 @@ public class MusicIO {
      */
     public List<Song> buildSongs(String albumID) {
         List<Song> ret = new ArrayList<>();
-        HashMap<String, String> dictionary = buildArtworkDictionary();
+        HashMap<String, String> dictionary = buildArtworkDictionary(SONGS_ID);
 
         String[] projection = new String[] {MediaStore.Audio.Media._ID,
                 MediaStore.Audio.Media.TITLE,
@@ -46,7 +47,7 @@ public class MusicIO {
 
             do {
                 Song song = new Song(c);
-                //TODO: Add album artwork path to the song object from dictionary
+                // Add album artwork path to the song object from dictionary
                 song.setmArtPath(dictionary.get(c.getString(c.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID))));
 
                 if(albumID != null) {
@@ -102,24 +103,63 @@ public class MusicIO {
         return ret;
     }
 
-    private HashMap<String, String> buildArtworkDictionary() {
+    /**
+     * Build a list of artists from external storage
+     * @return a list of artists
+     */
+    public List<Artist> buildArtists() {
+        List<Artist> ret = new ArrayList<>();
+        HashMap<String, String> dictionary = buildArtworkDictionary(ARTISTS_ID);
+
+        String[] projection = new String[] {MediaStore.Audio.Artists._ID,
+                MediaStore.Audio.Artists.ARTIST,
+                MediaStore.Audio.Artists.NUMBER_OF_ALBUMS};
+
+        Cursor c = mContentResolver.query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, projection, null, null, "upper(" + MediaStore.Audio.Artists.ARTIST + ") ASC");
+        if(c != null && c.moveToFirst()) {
+
+            do {
+                Artist artist = new Artist(c);
+                artist.setmArtPath(dictionary.get(c.getString(c.getColumnIndex(MediaStore.Audio.Artists.ARTIST))));
+
+                ret.add(artist);
+            } while (c.moveToNext());
+            c.close();
+        }
+        return ret;
+    }
+
+    /**
+     * Build a hash map so that artwork can be matched to songs or artists
+     * @param id the id of which type of music object requires the artwork
+     * @return a HashMap of either Album id or Artist name keys and Artwork path values
+     */
+    private HashMap<String, String> buildArtworkDictionary(int id) {
         HashMap<String, String> hashMap = new HashMap<>();
 
-        //TODO: Build an artwork dictionary so that artwork is retrievable by songs
         String[] projection = new String [] {MediaStore.Audio.Albums._ID,
-                MediaStore.Audio.Albums.ALBUM_ART};
+                MediaStore.Audio.Albums.ALBUM_ART,
+                MediaStore.Audio.Albums.ARTIST};
 
         Cursor c = mContentResolver.query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, projection, null, null, MediaStore.Audio.Media.ALBUM + " ASC");
 
         if(c != null && c.moveToFirst()) {
 
             do {
-                hashMap.put(c.getString(c.getColumnIndex(MediaStore.Audio.Albums._ID)), c.getString(c.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART)));
+                if(id == SONGS_ID) {
+                    hashMap.put(c.getString(c.getColumnIndex(MediaStore.Audio.Albums._ID)), c.getString(c.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART)));
+                } else if (id == ARTISTS_ID) {
+                    if(!hashMap.containsKey(c.getString(c.getColumnIndex(MediaStore.Audio.Albums.ARTIST)))) {
+                        hashMap.put(c.getString(c.getColumnIndex(MediaStore.Audio.Albums.ARTIST)), c.getString(c.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART)));
+                    }
+                }
             } while (c.moveToNext());
             c.close();
         }
         
         return hashMap;
     }
+
+    
 
 }

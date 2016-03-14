@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new SongsFragment(), "Queue");
         adapter.addFragment(new SongsFragment(), "Songs");
-        adapter.addFragment(new SongsFragment(), "Artists");
+        adapter.addFragment(new ArtistsFragment(), "Artists");
         adapter.addFragment(new AlbumsFragment(), "Albums");
         adapter.addFragment(new SongsFragment(), "Playlists");
         viewPager.setAdapter(adapter);

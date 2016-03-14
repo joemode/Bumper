@@ -33,13 +33,6 @@ public class AlbumsFragment  extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_music_list, container, false);
 
-        //ListView lv = (ListView) root.findViewById(R.id.song_list);
-        //ProgressBar spinner = (ProgressBar) root.findViewById(R.id.progress_song);
-
-        //AlbumListAdapter adapter = new AlbumListAdapter(lv, spinner);
-        //lv.setAdapter(adapter);
-
-
         ProgressBar spinner = (ProgressBar) root.findViewById(R.id.progress_song);
         RecyclerView rv = (RecyclerView) root.findViewById(R.id.song_list);
 

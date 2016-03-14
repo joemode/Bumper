@@ -72,6 +72,8 @@ public class Song {
         return mAlbumID;
     }
 
+
+    /** Setters **/
     public void setmArtPath(String mArtPath) {
         this.mArtPath = mArtPath;
     }
