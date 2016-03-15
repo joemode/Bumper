@@ -1,9 +1,8 @@
 package com.schoenherr.bumper.Adapters;
 
-import android.content.DialogInterface;
-import android.media.Image;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -26,29 +25,30 @@ import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by Joe on 3/14/2016.
  */
-public class SongRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class QueueRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<Song> songs = new ArrayList<>();
     private View view;
     private ProgressBar spinner;
 
-    public SongRecyclerAdapter(View view, ProgressBar spinner) {
+    public QueueRecyclerAdapter(View view, ProgressBar spinner) {
         this.view = view;
         this.spinner = spinner;
 
         update();
     }
 
-    private void update() {
+    public void update() {
 
         new Thread(new Runnable() {
             @Override
             public void run() {
-                songs = new MusicIO(view.getContext()).buildSongs(null);
+                songs = Queue.getInstance().getSongs();
                 view.post(new Runnable() {
                     @Override
                     public void run() {
@@ -65,13 +65,12 @@ public class SongRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View item = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_song, parent, false);
 
-        return new SongViewHolder(item);
+        return new QueueViewHolder(item);
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-
-        SongViewHolder vh = (SongViewHolder) holder;
+        QueueViewHolder vh = (QueueViewHolder) holder;
 
         vh.vPrimary.setText(songs.get(position).getmName());
         vh.vSub.setText(songs.get(position).getmArtist());
@@ -84,6 +83,8 @@ public class SongRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         vh.vPosition = position;
         vh.vSongs = songs;
+
+        vh.vPlus.setImageResource(R.drawable.ic_remove_black_24dp);
     }
 
     @Override
@@ -91,7 +92,7 @@ public class SongRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         return songs.size();
     }
 
-    public static class SongViewHolder extends RecyclerView.ViewHolder {
+    public static class QueueViewHolder extends RecyclerView.ViewHolder {
 
         protected TextView vPrimary;
         protected TextView vSub;
@@ -100,7 +101,7 @@ public class SongRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         protected int vPosition;
         protected List<Song> vSongs;
 
-        public SongViewHolder(final View view) {
+        public QueueViewHolder(final View view) {
             super(view);
 
             vPrimary = (TextView) view.findViewById(R.id.primary_text);
@@ -112,24 +113,13 @@ public class SongRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 @Override
                 public void onClick(View v) {
                     Log.i("ON", "PLUS");
-
-                    PopupMenu popupMenu = new PopupMenu(view.getContext(), vPlus);
-                    popupMenu.getMenuInflater().inflate(R.menu.plus_menu, popupMenu.getMenu());
-
-                    popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                        public boolean onMenuItemClick(MenuItem item) {
-                            int id = item.getItemId();
-                            Toast.makeText(view.getContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
-                            //TODO: Actually add to the queue/playlist
-                            if(id == R.id.action_queue) {
-                                Queue.getInstance().addSong(vSongs.get(vPosition));
-                                MainActivity.getViewPager().getAdapter().notifyDataSetChanged();
-                            }
-                            return true;
+                    Snackbar.make(view, "Delete this song from the Queue?", Snackbar.LENGTH_SHORT).setAction("Yes", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Queue.getInstance().removeSong(vSongs.get(vPosition));
+                            MainActivity.getViewPager().getAdapter().notifyDataSetChanged();
                         }
-                    });
-
-                    popupMenu.show();
+                    }).setActionTextColor(ContextCompat.getColor(view.getContext(), R.color.colorPrimary)).show();
                 }
             });
 

@@ -1,7 +1,11 @@
 package com.schoenherr.bumper.ui;
 
+import android.content.Context;
 import android.content.res.Configuration;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -12,12 +16,21 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.style.RelativeSizeSpan;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import com.schoenherr.bumper.Queue;
 import com.schoenherr.bumper.R;
+import com.schoenherr.bumper.Song;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,8 +47,18 @@ public class MainActivity extends AppCompatActivity {
     /** Toolbar & Tab members */
     private Toolbar mToolbar;
     private TabLayout mTabLayout;
-    private ViewPager mViewPager;
+    private static ViewPager mViewPager;
 
+    private static ViewPagerAdapter mViewPagerAdapter;
+
+    private static final String SHUFFLE = "SHUFFLE";
+    private static final String SKIP_PREV = "SKIP_PREV";
+    private static final String PLAY = "PLAY";
+    private static final String SKIP_NEXT = "SKIP_NEXT";
+    private static final String REPEAT = "REPEAT";
+
+
+    private MediaPlayer mMediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +130,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        RelativeLayout controller = (RelativeLayout) findViewById(R.id.controller);
+        setupController(controller);
 
     }
 
@@ -162,13 +187,42 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new SongsFragment(), "Queue");
-        adapter.addFragment(new SongsFragment(), "Songs");
-        adapter.addFragment(new ArtistsFragment(), "Artists");
-        adapter.addFragment(new AlbumsFragment(), "Albums");
-        adapter.addFragment(new PlaylistsFragment(), "Playlists");
-        viewPager.setAdapter(adapter);
+        mViewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+        mViewPagerAdapter.addFragment(new QueueFragment(), "Queue");
+        mViewPagerAdapter.addFragment(new SongsFragment(), "Songs");
+        mViewPagerAdapter.addFragment(new ArtistsFragment(), "Artists");
+        mViewPagerAdapter.addFragment(new AlbumsFragment(), "Albums");
+        mViewPagerAdapter.addFragment(new PlaylistsFragment(), "Playlists");
+        viewPager.setAdapter(mViewPagerAdapter);
+    }
+
+    private void setupController(View view) {
+        Song currentSong = null;
+
+        ImageView artwork = (ImageView) view.findViewById(R.id.artwork);
+        ImageView shuffle = (ImageView) view.findViewById(R.id.shuffle);
+        ImageView skipPrev = (ImageView) view.findViewById(R.id.skip_prev);
+        ImageView play = (ImageView) view.findViewById(R.id.play);
+        ImageView skipNext = (ImageView) view.findViewById(R.id.skip_next);
+        ImageView repeat = (ImageView) view.findViewById(R.id.repeat);
+
+        if(Queue.getInstance().getSongs().size() > 0) {
+            currentSong = Queue.getInstance().getSongs().get(0);
+        }
+
+        if(currentSong != null) {
+            if(currentSong.getmArtPath() != null) {
+                Picasso.with(view.getContext()).load(new File(currentSong.getmArtPath())).resize(200, 200).into(artwork);
+            }
+        } else {
+            Picasso.with(view.getContext()).load(R.drawable.ic_music).resize(200, 200).into(artwork);
+        }
+
+        shuffle.setOnClickListener(new ControllerOnClickListener(this, SHUFFLE));
+        skipPrev.setOnClickListener(new ControllerOnClickListener(this, SKIP_PREV));
+        play.setOnClickListener(new ControllerOnClickListener(this, PLAY));
+        skipNext.setOnClickListener(new ControllerOnClickListener(this, SKIP_NEXT));
+        repeat.setOnClickListener(new ControllerOnClickListener(this, REPEAT));
     }
 
     class ViewPagerAdapter extends FragmentPagerAdapter {
@@ -194,10 +248,61 @@ public class MainActivity extends AppCompatActivity {
             return mFragmentTitleList.get(position);
         }
 
+        @Override
+        public int getItemPosition(Object object) {
+            if(object instanceof QueueFragment) {
+                QueueFragment fragment = (QueueFragment) object;
+                fragment.update();
+            }
+
+            return super.getItemPosition(object);
+        }
+
         public void addFragment(Fragment fragment, String title) {
             mFragmentList.add(fragment);
             mFragmentTitleList.add(title);
         }
+
+
     }
+
+    public static ViewPager getViewPager() {
+        return mViewPager;
+    }
+
+    private class ControllerOnClickListener implements View.OnClickListener {
+
+        private String message;
+        private Context context;
+        public ControllerOnClickListener(Context context, String message) {
+            this.message = message;
+            this.context = context;
+        }
+
+        @Override
+        public void onClick(View v) {
+            ImageView iv = (ImageView) v;
+
+            switch (message) {
+                case SHUFFLE:
+                    Toast.makeText(context, SHUFFLE, Toast.LENGTH_SHORT).show();
+                    break;
+                case SKIP_PREV:
+                    Toast.makeText(context, SKIP_PREV, Toast.LENGTH_SHORT).show();
+                    break;
+                case PLAY:
+                    Toast.makeText(context, PLAY, Toast.LENGTH_SHORT).show();
+                    break;
+                case SKIP_NEXT:
+                    Toast.makeText(context, SKIP_NEXT, Toast.LENGTH_SHORT).show();
+                    break;
+                case REPEAT:
+                    Toast.makeText(context, REPEAT, Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    }
+
+
 
 }
