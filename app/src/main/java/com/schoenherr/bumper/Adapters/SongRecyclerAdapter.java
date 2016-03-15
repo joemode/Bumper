@@ -2,6 +2,7 @@ package com.schoenherr.bumper.Adapters;
 
 import android.content.DialogInterface;
 import android.media.Image;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.Layout;
 import android.util.Log;
@@ -138,6 +139,9 @@ public class SongRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 public void onClick(View v) {
                     Log.i("ON", "SELECTED");
                     Toast.makeText(view.getContext(), "Play " + vSongs.get(vPosition).getmName(), Toast.LENGTH_SHORT).show();
+
+                    //Call MainActivity function
+                    MainActivity.initializeMusicPlayerSingle(vSongs.get(vPosition));
                 }
             });
 

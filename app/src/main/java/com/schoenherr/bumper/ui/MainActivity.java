@@ -2,7 +2,9 @@ package com.schoenherr.bumper.ui;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
@@ -25,12 +27,14 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.schoenherr.bumper.Bumper;
 import com.schoenherr.bumper.Queue;
 import com.schoenherr.bumper.R;
 import com.schoenherr.bumper.Song;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +53,17 @@ public class MainActivity extends AppCompatActivity {
     private TabLayout mTabLayout;
     private static ViewPager mViewPager;
 
+    /** Other View Elements */
     private static ViewPagerAdapter mViewPagerAdapter;
+    private RelativeLayout mController;
+
+    /** Controller Members **/
+    private static ImageView mArtwork;
+    private static ImageView mShuffle;
+    private static ImageView mSkipPrev;
+    private static ImageView mPlay;
+    private static ImageView mSkipNext;
+    private static ImageView mRepeat;
 
     private static final String SHUFFLE = "SHUFFLE";
     private static final String SKIP_PREV = "SKIP_PREV";
@@ -57,8 +71,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String SKIP_NEXT = "SKIP_NEXT";
     private static final String REPEAT = "REPEAT";
 
-
-    private MediaPlayer mMediaPlayer;
+    /** Media Members */
+    private static MediaPlayer mMediaPlayer;
+    private static Song mCurrentSong = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,8 +145,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        RelativeLayout controller = (RelativeLayout) findViewById(R.id.controller);
-        setupController(controller);
+        mController = (RelativeLayout) findViewById(R.id.controller);
+        setupController(mController);
+        mMediaPlayer =  new MediaPlayer();
+        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
     }
 
@@ -197,32 +214,60 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupController(View view) {
-        Song currentSong = null;
 
-        ImageView artwork = (ImageView) view.findViewById(R.id.artwork);
-        ImageView shuffle = (ImageView) view.findViewById(R.id.shuffle);
-        ImageView skipPrev = (ImageView) view.findViewById(R.id.skip_prev);
-        ImageView play = (ImageView) view.findViewById(R.id.play);
-        ImageView skipNext = (ImageView) view.findViewById(R.id.skip_next);
-        ImageView repeat = (ImageView) view.findViewById(R.id.repeat);
+        mArtwork = (ImageView) view.findViewById(R.id.artwork);
+        mShuffle = (ImageView) view.findViewById(R.id.shuffle);
+        mSkipPrev = (ImageView) view.findViewById(R.id.skip_prev);
+        mPlay = (ImageView) view.findViewById(R.id.play);
+        mSkipNext = (ImageView) view.findViewById(R.id.skip_next);
+        mRepeat = (ImageView) view.findViewById(R.id.repeat);
 
-        if(Queue.getInstance().getSongs().size() > 0) {
-            currentSong = Queue.getInstance().getSongs().get(0);
-        }
+        updateArtwork(view.getContext());
 
-        if(currentSong != null) {
-            if(currentSong.getmArtPath() != null) {
-                Picasso.with(view.getContext()).load(new File(currentSong.getmArtPath())).resize(200, 200).into(artwork);
+        mShuffle.setOnClickListener(new ControllerOnClickListener(this, SHUFFLE));
+        mSkipPrev.setOnClickListener(new ControllerOnClickListener(this, SKIP_PREV));
+        mPlay.setOnClickListener(new ControllerOnClickListener(this, PLAY));
+        mSkipNext.setOnClickListener(new ControllerOnClickListener(this, SKIP_NEXT));
+        mRepeat.setOnClickListener(new ControllerOnClickListener(this, REPEAT));
+    }
+
+    private static void updateArtwork(Context context) {
+        if(mCurrentSong != null) {
+            if(mCurrentSong.getmArtPath() != null) {
+                Picasso.with(context).load(new File(mCurrentSong.getmArtPath())).resize(200, 200).into(mArtwork);
             }
         } else {
-            Picasso.with(view.getContext()).load(R.drawable.ic_music).resize(200, 200).into(artwork);
+            Picasso.with(context).load(R.drawable.ic_music).resize(200, 200).into(mArtwork);
+        }
+        mArtwork.invalidate();
+    }
+
+
+    public static void initializeMusicPlayerSingle(Song song) {
+        //Prepare URI for song
+        Uri uri = null;
+        if(song != null) {
+            String uriString = song.getmData();
+            uri = Uri.parse(uriString);
+            mCurrentSong = song;
         }
 
-        shuffle.setOnClickListener(new ControllerOnClickListener(this, SHUFFLE));
-        skipPrev.setOnClickListener(new ControllerOnClickListener(this, SKIP_PREV));
-        play.setOnClickListener(new ControllerOnClickListener(this, PLAY));
-        skipNext.setOnClickListener(new ControllerOnClickListener(this, SKIP_NEXT));
-        repeat.setOnClickListener(new ControllerOnClickListener(this, REPEAT));
+        if(mMediaPlayer.isPlaying()) {
+            mMediaPlayer.stop();
+            switchPlayPause();
+        }
+
+        try {
+            mMediaPlayer.reset();
+            mMediaPlayer.setDataSource(Bumper.getAppContext(), uri);
+            mMediaPlayer.prepare();
+            mMediaPlayer.start();
+
+            updateArtwork(Bumper.getAppContext());
+            switchPlayPause();
+        } catch (IOException ex) {
+            Log.i("IOException", ex.getMessage());
+        }
     }
 
     class ViewPagerAdapter extends FragmentPagerAdapter {
@@ -291,6 +336,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(context, SKIP_PREV, Toast.LENGTH_SHORT).show();
                     break;
                 case PLAY:
+                    switchPlayPauseControl();
                     Toast.makeText(context, PLAY, Toast.LENGTH_SHORT).show();
                     break;
                 case SKIP_NEXT:
@@ -301,6 +347,26 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
         }
+    }
+
+    private static void switchPlayPauseControl() {
+        if(mMediaPlayer.isPlaying()) {
+            mMediaPlayer.pause();
+            mPlay.setImageResource(R.drawable.ic_play_arrow_white_48dp);
+        } else {
+            mMediaPlayer.start();
+            mPlay.setImageResource(R.drawable.ic_pause_white_48dp);
+        }
+        mPlay.invalidate();
+    }
+
+    private static void switchPlayPause() {
+        if(mMediaPlayer.isPlaying()) {
+            mPlay.setImageResource(R.drawable.ic_pause_white_48dp);
+        } else {
+            mPlay.setImageResource(R.drawable.ic_play_arrow_white_48dp);
+        }
+        mPlay.invalidate();
     }
 
 
