@@ -167,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
         adapter.addFragment(new SongsFragment(), "Songs");
         adapter.addFragment(new ArtistsFragment(), "Artists");
         adapter.addFragment(new AlbumsFragment(), "Albums");
-        adapter.addFragment(new SongsFragment(), "Playlists");
+        adapter.addFragment(new PlaylistsFragment(), "Playlists");
         viewPager.setAdapter(adapter);
     }
 

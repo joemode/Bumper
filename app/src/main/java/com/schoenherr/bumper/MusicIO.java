@@ -19,6 +19,8 @@ public class MusicIO {
 
     private static final int ARTISTS_ID = 0;
     private static final int SONGS_ID = 1;
+    private static final int ALBUMS_ID = 3;
+    private static final int PLAYLIST_ID = 4;
 
     public MusicIO(Context context) {
         this.mContext = context;
@@ -129,6 +131,25 @@ public class MusicIO {
         return ret;
     }
 
+    public List<Playlist> buildPlaylists() {
+        List<Playlist> ret = new ArrayList<>();
+
+        String[] projection = new String[] {MediaStore.Audio.Playlists._ID,
+                MediaStore.Audio.Playlists.NAME};
+
+        Cursor c = mContentResolver.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, projection, null, null, null);
+        if(c != null && c.moveToFirst()) {
+
+            do {
+                Playlist playlist = new Playlist(c);
+                ret.add(playlist);
+            } while (c.moveToNext());
+            c.close();
+        }
+
+        return ret;
+    }
+
     /**
      * Build a hash map so that artwork can be matched to songs or artists
      * @param id the id of which type of music object requires the artwork
@@ -160,6 +181,6 @@ public class MusicIO {
         return hashMap;
     }
 
-    
+
 
 }

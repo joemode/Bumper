@@ -6,10 +6,12 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -108,7 +110,20 @@ public class SongRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 @Override
                 public void onClick(View v) {
                     Log.i("ON", "PLUS");
-                    Toast.makeText(view.getContext(), "Add " + vSongs.get(vPosition).getmName() + " to playlist", Toast.LENGTH_SHORT).show();
+
+                    PopupMenu popupMenu = new PopupMenu(view.getContext(), vPlus);
+                    popupMenu.getMenuInflater().inflate(R.menu.plus_menu, popupMenu.getMenu());
+
+                    popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        public boolean onMenuItemClick(MenuItem item) {
+                            int id = item.getItemId();
+                            Toast.makeText(view.getContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
+                            //TODO: Actually add to the queue/playlist
+                            return true;
+                        }
+                    });
+
+                    popupMenu.show();
                 }
             });
 

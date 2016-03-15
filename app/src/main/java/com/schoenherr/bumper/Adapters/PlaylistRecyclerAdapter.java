@@ -13,8 +13,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.schoenherr.bumper.Album;
 import com.schoenherr.bumper.MusicIO;
+import com.schoenherr.bumper.Playlist;
 import com.schoenherr.bumper.R;
 import com.squareup.picasso.Picasso;
 
@@ -25,12 +25,13 @@ import java.util.List;
 /**
  * Created by Joe on 3/14/2016.
  */
-public class AlbumRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private List<Album> albums = new ArrayList<>();
+public class PlaylistRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private List<Playlist> playlists = new ArrayList<>();
     private View view;
     private ProgressBar spinner;
 
-    public AlbumRecyclerAdapter(View view, ProgressBar spinner) {
+    public PlaylistRecyclerAdapter(View view, ProgressBar spinner) {
         this.view = view;
         this.spinner = spinner;
 
@@ -42,7 +43,7 @@ public class AlbumRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         new Thread(new Runnable() {
             @Override
             public void run() {
-                albums = new MusicIO(view.getContext()).buildAlbums(null);
+                playlists = new MusicIO(view.getContext()).buildPlaylists();
                 view.post(new Runnable() {
                     @Override
                     public void run() {
@@ -55,56 +56,56 @@ public class AlbumRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     }
 
+
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View item = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_album, parent, false);
 
-        return new AlbumViewHolder(item);
+        return new PlaylistViewHolder(item);
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        PlaylistViewHolder vh = (PlaylistViewHolder) holder;
 
-        AlbumViewHolder vh = (AlbumViewHolder) holder;
+        vh.vPrimary.setText(playlists.get(position).getmName());
+        vh.vOverflow.setImageResource(R.drawable.ic_more_vert_black_24dp);
 
-        vh.vPrimary.setText(albums.get(position).getmName());
-
-        if(albums.get(position).getmArtPath() != null) {
-            Picasso.with(view.getContext()).load(new File(albums.get(position).getmArtPath())).resize(200, 200).into(vh.vArtwork);
-        } else {
-            Picasso.with(view.getContext()).load(R.drawable.ic_music).resize(200, 200).into(vh.vArtwork);
-        }
+        Picasso.with(view.getContext()).load(R.drawable.ic_music).resize(200, 200).into(vh.vArtwork);
 
         vh.vPosition = position;
-        vh.vAlbums = albums;
+        vh.vPlaylists = playlists;
     }
 
     @Override
     public int getItemCount() {
-        return albums.size();
+        return playlists.size();
     }
 
-    public static class AlbumViewHolder extends RecyclerView.ViewHolder {
+    public static class PlaylistViewHolder extends RecyclerView.ViewHolder {
 
         protected TextView vPrimary;
+        protected TextView vSub;
         protected ImageView vArtwork;
-        protected ImageButton vPlus;
+        protected ImageButton vOverflow;
         protected int vPosition;
-        protected List<Album> vAlbums;
+        protected List<Playlist> vPlaylists;
 
-        public AlbumViewHolder(final View view) {
+        public PlaylistViewHolder(final View view) {
             super(view);
 
             vPrimary = (TextView) view.findViewById(R.id.primary_text);
+            vSub = (TextView) view.findViewById(R.id.sub_text);
             vArtwork = (ImageView) view.findViewById(R.id.artwork);
-            vPlus = (ImageButton) view.findViewById(R.id.plus_image);
+            vOverflow = (ImageButton) view.findViewById(R.id.plus_image);
 
-            vPlus.setOnClickListener(new View.OnClickListener() {
+            vOverflow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Log.i("ON", "PLUS");
-                    PopupMenu popupMenu = new PopupMenu(view.getContext(), vPlus);
-                    popupMenu.getMenuInflater().inflate(R.menu.plus_menu, popupMenu.getMenu());
+
+                    PopupMenu popupMenu = new PopupMenu(view.getContext(), vOverflow);
+                    popupMenu.getMenuInflater().inflate(R.menu.playlist_menu, popupMenu.getMenu());
 
                     popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                         public boolean onMenuItemClick(MenuItem item) {
@@ -123,7 +124,7 @@ public class AlbumRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 @Override
                 public void onClick(View v) {
                     Log.i("ON", "SELECTED");
-                    Toast.makeText(view.getContext(), "Open " + vAlbums.get(vPosition).getmName(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(view.getContext(), "View " + vPlaylists.get(vPosition).getmName(), Toast.LENGTH_SHORT).show();
                 }
             });
 
